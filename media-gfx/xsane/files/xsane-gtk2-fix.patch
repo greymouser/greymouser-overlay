@@ -1,0 +1,90 @@
+diff '--color=auto' -urN xsane-0.999/src/xsane-gamma.c xsane-0.999-gtk2-fix/src/xsane-gamma.c
+--- xsane-0.999/src/xsane-gamma.c	2010-11-16 20:25:38.000000000 -0000
++++ xsane-0.999-gtk2-fix/src/xsane-gamma.c	2025-10-21 22:07:27.416093487 -0000
+@@ -578,7 +578,7 @@
+ 
+   if (xsane.slider_timer_restart)
+   {
+-    xsane.slider_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, xsane_slider_hold_event, 0);
++    xsane.slider_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, (GtkFunction) xsane_slider_hold_event, 0);
+     xsane.slider_timer_restart = FALSE;
+   }
+ 
+@@ -676,7 +676,7 @@
+       /* call xsane_enhancement_by_histogram by event handler */
+       if (!xsane.slider_timer)
+       {
+-        xsane.slider_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, xsane_slider_hold_event, 0);
++        xsane.slider_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, (GtkFunction) xsane_slider_hold_event, 0);
+       }
+       else
+       {
+@@ -690,7 +690,7 @@
+         gtk_timeout_remove(xsane.slider_timer);
+       }          
+       /* call xsane_slider_hold_event if mouse is not moved for ??? ms */
+-      xsane.slider_timer = gtk_timeout_add(XSANE_HOLD_TIME, xsane_slider_hold_event, 0);
++      xsane.slider_timer = gtk_timeout_add(XSANE_HOLD_TIME, (GtkFunction) xsane_slider_hold_event, 0);
+     }
+   }
+ 
+@@ -1963,7 +1963,7 @@
+   {
+     gtk_timeout_remove(xsane.batch_scan_gamma_timer);
+   }
+-  xsane.batch_scan_gamma_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME * 4, xsane_batch_scan_gamma_event, 0);
++  xsane.batch_scan_gamma_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME * 4, (GtkFunction) xsane_batch_scan_gamma_event, 0);
+ }
+ 
+ /* ---------------------------------------------------------------------------------------------------------------------- */
+diff '--color=auto' -urN xsane-0.999/src/xsane-preview.c xsane-0.999-gtk2-fix/src/xsane-preview.c
+--- xsane-0.999/src/xsane-preview.c	2025-10-21 21:48:44.540280578 -0000
++++ xsane-0.999-gtk2-fix/src/xsane-preview.c	2025-10-21 22:08:55.141784416 -0000
+@@ -3192,7 +3192,7 @@
+           {
+             if (!p->hold_timer) /* hold timer active? then remove it, we had a motion */
+             {
+-              p->hold_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, preview_hold_event_handler, (gpointer *) p);
++              p->hold_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, (GtkFunction) preview_hold_event_handler, (gpointer *) p);
+             }
+             preview_update_maximum_output_size(p);
+             preview_draw_selection(p);
+@@ -3205,7 +3205,7 @@
+               gtk_timeout_remove(p->hold_timer);
+               p->hold_timer = 0;
+             }
+-            p->hold_timer = gtk_timeout_add(XSANE_HOLD_TIME, preview_hold_event_handler, (gpointer *) p);
++            p->hold_timer = gtk_timeout_add(XSANE_HOLD_TIME, (GtkFunction) preview_hold_event_handler, (gpointer *) p);
+             preview_update_maximum_output_size(p);
+             preview_draw_selection(p);
+           }
+@@ -3376,7 +3376,7 @@
+           {
+             if (!p->hold_timer) /* hold timer active? then remove it, we had a motion */
+             {
+-              p->hold_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, preview_hold_event_handler, (gpointer *) p);
++              p->hold_timer = gtk_timeout_add(XSANE_CONTINUOUS_HOLD_TIME, (GtkFunction) preview_hold_event_handler, (gpointer *) p);
+             }
+             preview_update_maximum_output_size(p);
+             preview_draw_selection(p);
+@@ -3388,7 +3388,7 @@
+               gtk_timeout_remove(p->hold_timer);
+               p->hold_timer = 0;
+             }
+-            p->hold_timer = gtk_timeout_add (XSANE_HOLD_TIME, preview_hold_event_handler, (gpointer *) p);
++            p->hold_timer = gtk_timeout_add (XSANE_HOLD_TIME, (GtkFunction) preview_hold_event_handler, (gpointer *) p);
+             preview_update_maximum_output_size(p);
+             preview_draw_selection(p);
+           }
+diff '--color=auto' -urN xsane-0.999/src/xsane-save.h xsane-0.999-gtk2-fix/src/xsane-save.h
+--- xsane-0.999/src/xsane-save.h	2007-03-03 00:08:32.000000000 -0000
++++ xsane-0.999-gtk2-fix/src/xsane-save.h	2025-10-21 22:12:09.447706997 -0000
+@@ -50,7 +50,7 @@
+ 
+ 
+ extern int xsane_create_secure_file(const char *filename);
+-extern void xsane_cancel_save();
++extern void xsane_cancel_save(int *);
+ extern void xsane_convert_text_to_filename(char **filename);
+ extern int xsane_get_filesize(char *filename);
+ extern void xsane_ensure_counter_in_filename(char **filename, int counter_len);
