@@ -1,0 +1,11 @@
+diff '--color=auto' -urN fprintd-v1.94.5-test/data/fprintd.service.in fprintd-v1.94.5-fix/data/fprintd.service.in
+--- fprintd-v1.94.5-test/data/fprintd.service.in	2025-02-20 15:20:51.000000000 -0500
++++ fprintd-v1.94.5-fix/data/fprintd.service.in	2025-09-10 17:39:34.258950862 -0400
+@@ -44,3 +44,7 @@
+ 
+ # Allow tuning USB parameters (wakeup and persist)
+ ReadWritePaths=/sys/devices
++
++[Install]
++WantedBy=multi-user.target
++

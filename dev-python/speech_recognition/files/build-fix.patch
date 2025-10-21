@@ -1,0 +1,24 @@
+diff '--color=auto' -urN speech_recognition-3.14.3/setup.cfg speech_recognition-3.14.3-build-fix/setup.cfg
+--- speech_recognition-3.14.3/setup.cfg	2025-05-12 10:58:47.000000000 -0400
++++ speech_recognition-3.14.3-build-fix/setup.cfg	2025-09-16 21:14:19.323085733 -0400
+@@ -23,3 +23,8 @@
+     httpx < 0.28
+ assemblyai =
+     requests
++
++[options.packages.find]
++exclude =
++    tests
++    tests.
+diff '--color=auto' -urN speech_recognition-3.14.3/setup.py speech_recognition-3.14.3-build-fix/setup.py
+--- speech_recognition-3.14.3/setup.py	2025-05-12 10:58:47.000000000 -0400
++++ speech_recognition-3.14.3-build-fix/setup.py	2025-09-16 21:18:29.874065266 -0400
+@@ -38,7 +38,7 @@
+ setup(
+     name="SpeechRecognition",
+     version=speech_recognition.__version__,
+-    packages=find_packages(exclude=["tests.*", "test"]),
++    packages=find_packages(exclude=["tests", "tests.*"]),
+     include_package_data=True,
+     cmdclass={"install": InstallWithExtraSteps},
+ 

@@ -1,0 +1,10 @@
+diff '--color=auto' -urN iio-sensor-proxy-3.8/data/iio-sensor-proxy.service.in iio-sensor-proxy-3.8-fix-systemd/data/iio-sensor-proxy.service.in
+--- iio-sensor-proxy-3.8/data/iio-sensor-proxy.service.in	2025-08-09 07:57:19.000000000 -0400
++++ iio-sensor-proxy-3.8-fix-systemd/data/iio-sensor-proxy.service.in	2025-09-25 12:54:43.090950166 -0400
+@@ -17,3 +17,6 @@
+ RestrictAddressFamilies=AF_UNIX AF_LOCAL AF_NETLINK
+ MemoryDenyWriteExecute=true
+ RestrictRealtime=true
++
++[Install]
++WantedBy=multi-user.target

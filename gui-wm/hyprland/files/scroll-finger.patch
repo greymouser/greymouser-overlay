@@ -1,0 +1,20 @@
+diff '--color=auto' -urN hyprland-0.50.1-clean/src/managers/KeybindManager.cpp hyprland-0.50.1-scroll/src/managers/KeybindManager.cpp
+--- hyprland-0.50.1-clean/src/managers/KeybindManager.cpp	2025-07-19 17:41:51.000000000 -0400
++++ hyprland-0.50.1-scroll/src/managers/KeybindManager.cpp	2025-09-02 23:32:31.466232062 -0400
+@@ -529,12 +529,14 @@
+     m_activeKeybinds.clear();
+ 
+     bool found = false;
+-    if (e.source == WL_POINTER_AXIS_SOURCE_WHEEL && e.axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
++    if ((e.source == WL_POINTER_AXIS_SOURCE_WHEEL || e.source == WL_POINTER_AXIS_SOURCE_FINGER)
++        && e.axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
+         if (e.delta < 0)
+             found = !handleKeybinds(MODS, SPressedKeyWithMods{.keyName = "mouse_down"}, true).passEvent;
+         else
+             found = !handleKeybinds(MODS, SPressedKeyWithMods{.keyName = "mouse_up"}, true).passEvent;
+-    } else if (e.source == WL_POINTER_AXIS_SOURCE_WHEEL && e.axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
++    } else if ((e.source == WL_POINTER_AXIS_SOURCE_WHEEL || e.source == WL_POINTER_AXIS_SOURCE_FINGER)
++        && e.axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
+         if (e.delta < 0)
+             found = !handleKeybinds(MODS, SPressedKeyWithMods{.keyName = "mouse_left"}, true).passEvent;
+         else

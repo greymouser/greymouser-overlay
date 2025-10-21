@@ -1,0 +1,121 @@
+diff '--color=auto' -urN hyprland-0.50.1-clean/src/Compositor.cpp hyprland-0.50.1/src/Compositor.cpp
+--- hyprland-0.50.1-clean/src/Compositor.cpp	2025-07-19 17:41:51.000000000 -0400
++++ hyprland-0.50.1/src/Compositor.cpp	2025-08-31 00:11:28.476804191 -0400
+@@ -186,12 +186,12 @@
+     m_hyprTempDataRoot = std::string{getenv("XDG_RUNTIME_DIR")} + "/hypr";
+ 
+     if (m_hyprTempDataRoot.starts_with("/hypr")) {
+-        std::println("Bailing out, $XDG_RUNTIME_DIR is invalid");
++        std::println(stderr, "$XDG_RUNTIME_DIR is invalid");
+         throw std::runtime_error("CCompositor() failed");
+     }
+ 
+     if (!m_hyprTempDataRoot.starts_with("/run/user"))
+-        std::println("[!!WARNING!!] XDG_RUNTIME_DIR looks non-standard. Proceeding anyways...");
++        std::println(stderr, "[!!WARNING!!] XDG_RUNTIME_DIR looks non-standard. Proceeding anyways...");
+ 
+     std::random_device              dev;
+     std::mt19937                    engine(dev());
+@@ -204,19 +204,19 @@
+     if (!std::filesystem::exists(m_hyprTempDataRoot))
+         mkdir(m_hyprTempDataRoot.c_str(), S_IRWXU);
+     else if (!std::filesystem::is_directory(m_hyprTempDataRoot)) {
+-        std::println("Bailing out, {} is not a directory", m_hyprTempDataRoot);
++        std::println(stderr, "Bailing out, {} is not a directory", m_hyprTempDataRoot);
+         throw std::runtime_error("CCompositor() failed");
+     }
+ 
+     m_instancePath = m_hyprTempDataRoot + "/" + m_instanceSignature;
+ 
+     if (std::filesystem::exists(m_instancePath)) {
+-        std::println("Bailing out, {} exists??", m_instancePath);
++        std::println(stderr, "Bailing out, {} exists??", m_instancePath);
+         throw std::runtime_error("CCompositor() failed");
+     }
+ 
+     if (mkdir(m_instancePath.c_str(), S_IRWXU) < 0) {
+-        std::println("Bailing out, couldn't create {}", m_instancePath);
++        std::println(stderr, "Bailing out, couldn't create {}", m_instancePath);
+         throw std::runtime_error("CCompositor() failed");
+     }
+ 
+@@ -287,7 +287,8 @@
+         g_pAnimationManager = makeUnique<CHyprAnimationManager>();
+         g_pConfigManager    = makeUnique<CConfigManager>();
+ 
+-        std::println("\n\n======== Config parsing result:\n\n{}", g_pConfigManager->verify());
++        if (!Debug::m_disableStdout)
++            std::println("\n\n======== Config parsing result:\n\n{}", g_pConfigManager->verify());
+         return;
+     }
+ 
+diff '--color=auto' -urN hyprland-0.50.1-clean/src/main.cpp hyprland-0.50.1/src/main.cpp
+--- hyprland-0.50.1-clean/src/main.cpp	2025-07-19 17:41:51.000000000 -0400
++++ hyprland-0.50.1/src/main.cpp	2025-09-01 01:30:56.243883392 -0400
+@@ -22,10 +22,10 @@
+     std::println("usage: Hyprland [arg [...]].\n");
+     std::println(R"(Arguments:
+     --help              -h       - Show this message again
++    --quiet             -q       - Silence stdout (silences early stdout as well as stdout log)
+     --config FILE       -c FILE  - Specify config file to use
+     --socket NAME                - Sets the Wayland socket name (for Wayland socket handover)
+     --wayland-fd FD              - Sets the Wayland socket fd (for Wayland socket handover)
+-    --systeminfo                 - Prints system infos
+     --i-am-really-stupid         - Omits root user privileges check (why would you do that?)
+     --verify-config              - Do not run Hyprland, only print if the config has any errors
+     --version           -v       - Print this binary's version)");
+@@ -51,13 +51,22 @@
+     std::string              configPath;
+     std::string              socketName;
+     int                      socketFd   = -1;
+-    bool                     ignoreSudo = false, verifyConfig = false;
++    bool                     ignoreSudo = false, verifyConfig = false, quiet = false;
+ 
+     std::vector<std::string> args{argv + 1, argv + argc};
+ 
+     for (auto it = args.begin(); it != args.end(); it++) {
++        if (*it == "-q" || *it == "--quiet") {
++            quiet = true;
++            Debug::m_disableStdout = true;
++            break;
++        }
++    }
++
++    for (auto it = args.begin(); it != args.end(); it++) {
+         if (*it == "--i-am-really-stupid" && !ignoreSudo) {
+-            std::println("[ WARNING ] Running Hyprland with superuser privileges might damage your system");
++            if (!quiet)
++                std::println("[ WARNING ] Running Hyprland with superuser privileges might damage your system");
+ 
+             ignoreSudo = true;
+         } else if (*it == "--socket") {
+@@ -129,7 +138,9 @@
+         } else if (*it == "--verify-config") {
+             verifyConfig = true;
+             continue;
+-        } else {
++        } if (*it == "-q" || *it == "--quiet") {
++            continue;
++	} else {
+             std::println(stderr, "[ ERROR ] Unknown option '{}' !", *it);
+             help();
+ 
+@@ -144,7 +155,8 @@
+ 
+         return 1;
+     } else if (ignoreSudo && NInit::isSudo())
+-        std::println("Superuser privileges check is omitted. I hope you know what you're doing.");
++        if (!quiet)
++            std::println("Superuser privileges check is omitted. I hope you know what you're doing.");
+ 
+     if (socketName.empty() ^ (socketFd == -1)) {
+         std::println(stderr,
+@@ -155,7 +167,7 @@
+     }
+ 
+     if (!verifyConfig)
+-        std::println("Welcome to Hyprland!");
++        Debug::log(LOG, "Welcome to Hyprland!");
+ 
+     // let's init the compositor.
+     // it initializes basic Wayland stuff in the constructor.

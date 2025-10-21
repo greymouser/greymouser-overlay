@@ -1,0 +1,46 @@
+From 5fc98f2380b84e9ceac40b2d846cb8bf73011e55 Mon Sep 17 00:00:00 2001
+From: gongyong <185457686@qq.com>
+Date: Thu, 1 Aug 2024 15:08:29 +0800
+Subject: [PATCH] add sys_module cap for simulating wifi && map rfkill
+ ieee80211 onto sys filesystem for container
+
+---
+ data/configs/config_base | 2 +-
+ tools/helpers/lxc.py     | 4 ++++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/data/configs/config_base b/data/configs/config_base
+index 99fd198f..82114889 100644
+--- a/data/configs/config_base
++++ b/data/configs/config_base
+@@ -5,7 +5,7 @@ lxc.arch = LXCARCH
+ lxc.autodev = 0
+ # lxc.autodev.tmpfs.size = 25000000
+ 
+-lxc.cap.keep = audit_control sys_nice wake_alarm setpcap setgid setuid sys_ptrace sys_admin wake_alarm block_suspend sys_time net_admin net_raw net_bind_service kill dac_override dac_read_search fsetid mknod syslog chown sys_resource fowner ipc_lock sys_chroot
++lxc.cap.keep = audit_control sys_nice wake_alarm setpcap setgid setuid sys_ptrace sys_admin wake_alarm block_suspend sys_time net_admin net_raw net_bind_service kill dac_override dac_read_search fsetid mknod syslog chown sys_resource fowner ipc_lock sys_chroot sys_module
+ 
+ lxc.mount.auto = cgroup:ro sys:ro proc
+ 
+diff --git a/tools/helpers/lxc.py b/tools/helpers/lxc.py
+index c2ca4e7b..dbcacbaa 100644
+--- a/tools/helpers/lxc.py
++++ b/tools/helpers/lxc.py
+@@ -46,6 +46,7 @@ def make_entry(src, dist=None, mnt_type="none", options="bind,create=file,option
+     make_entry("/dev/ashmem")
+     make_entry("/dev/fuse")
+     make_entry("/dev/ion")
++    make_entry("/dev/rfkill")
+     make_entry("/dev/tty")
+     make_entry("/dev/char", options="bind,create=dir,optional 0 0")
+ 
+@@ -70,6 +71,9 @@ def make_entry(src, dist=None, mnt_type="none", options="bind,create=file,option
+     make_entry("/dev/" + args.BINDER_DRIVER, "dev/binder", check=False)
+     make_entry("/dev/" + args.VNDBINDER_DRIVER, "dev/vndbinder", check=False)
+     make_entry("/dev/" + args.HWBINDER_DRIVER, "dev/hwbinder", check=False)
++    # Wifi
++    make_entry("/sys/class/ieee80211", "sys/class/ieee80211", options="rbind,create=dir,optional 0 0", check=False)
++    make_entry("/sys/devices/virtual/ieee80211", "sys/devices/virtual/ieee80211", options="rbind,create=dir,optional 0 0", check=False)
+ 
+     if args.vendor_type != "MAINLINE":
+         if not make_entry("/dev/hwbinder", "dev/host_hwbinder"):
