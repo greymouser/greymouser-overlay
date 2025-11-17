@@ -21,6 +21,9 @@ fi
 LICENSE="BSD"
 SLOT="0/$(ver_cut 1-2)"
 
+BDEPEND="
+	dev-cpp/gtest
+"
 DEPEND="
 	x11-libs/pixman
 "
