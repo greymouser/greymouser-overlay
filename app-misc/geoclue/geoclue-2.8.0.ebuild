@@ -41,10 +41,6 @@ BDEPEND="${PYTHON_DEPS}
 	vala? ( $(vala_depend) )
 "
 
-#PATCHES=(
-#	"${FILESDIR}/${PN}-google-default.patch"
-#)
-
 src_prepare() {
 	default
 	use vala && vala_setup
@@ -61,11 +57,6 @@ src_configure() {
 		$(meson_use modemmanager cdma-source)
 		$(meson_use modemmanager modem-gps-source)
 		$(meson_use zeroconf nmea-source)
-		-Ddefault-wifi-url="url=https://www.googleapis.com/geolocation/v1/geolocate?key=YOUR_KEY"
-		# Set up Google API keys, see http://www.chromium.org/developers/how-tos/api-keys
-        # Note: these are for Gentoo use ONLY. For your own distribution,
-        # please get your own set of keys. Feel free to contact chromium@gentoo.org for more info.
-		-Dgoogle-api-key=AIzaSyDEAOvatFo0eTgsV_ZlEzx0ObmepsMzfAc
 		-Dcompass=true
 		-Denable-backend=true
 		-Ddemo-agent=true
@@ -73,4 +64,10 @@ src_configure() {
 		-Ddbus-srv-user=geoclue
 	)
 	meson_src_configure
+}
+
+pkg_postinst() {
+	einfo "Average, non-commercial users of geoclue who want WiFi based"
+	einfo "  network location discovery to work without much ado should"
+	einfo "  uncomment the Position geolocation service in /etc/geoclue/geoclue.conf"
 }
