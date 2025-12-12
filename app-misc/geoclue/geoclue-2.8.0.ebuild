@@ -41,9 +41,9 @@ BDEPEND="${PYTHON_DEPS}
 	vala? ( $(vala_depend) )
 "
 
-PATCHES=(
-	"${FILESDIR}/${PN}-google-default.patch"
-)
+#PATCHES=(
+#	"${FILESDIR}/${PN}-google-default.patch"
+#)
 
 src_prepare() {
 	default
